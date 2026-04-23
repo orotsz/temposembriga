@@ -50,10 +50,10 @@ body {
   to { opacity:1; transform: translateY(0); }
 }
 
-/* título */
 .titulo h1 {
   font-size:1.8rem;
   background: linear-gradient(90deg, #facc15, #a78bfa, #facc15);
+  background-size: 200%;
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   animation: brilho 3s linear infinite;
@@ -93,14 +93,12 @@ body {
   opacity:0.7;
 }
 
-/* mensagem */
 .mensagem {
   margin-top:20px;
   font-size:0.9rem;
-  opacity:0.85;
+  opacity:0.9;
 }
 
-/* botão */
 button {
   margin-top:15px;
   padding:10px 15px;
@@ -111,11 +109,10 @@ button {
   cursor:pointer;
 }
 
-/* meta */
 .meta {
   margin-top:15px;
   font-size:0.85rem;
-  opacity:0.8;
+  opacity:0.85;
 }
 
 </style>
@@ -148,10 +145,8 @@ button {
 </div>
 
 <script>
-// DATA
 let dataInicial = new Date("2025-10-12T11:00:00");
 
-// formatar
 function formatarData(data) {
   return data.toLocaleDateString("pt-BR") + " às " +
          data.toLocaleTimeString("pt-BR", { hour: '2-digit', minute: '2-digit' });
@@ -159,7 +154,6 @@ function formatarData(data) {
 
 subtitulo.innerText = "desde " + formatarData(dataInicial);
 
-// mensagens
 function mensagemTempo(dias){
   if(dias < 1) return "todo começo importa ❤️";
   if(dias < 7) return "uma semana quase... tô gostando disso 🥹";
@@ -168,7 +162,6 @@ function mensagemTempo(dias){
   return "isso aqui já é especial demais 💖";
 }
 
-// surpresa
 function mensagemSurpresa(){
   const frases = [
     "mesmo quando a gente discute, eu escolho você",
@@ -180,7 +173,6 @@ function mensagemSurpresa(){
   alert(frases[Math.floor(Math.random()*frases.length)]);
 }
 
-// metas corrigidas
 const metas = [1, 7, 30, 100, 365];
 
 function calc(diff){
@@ -203,15 +195,13 @@ function update(){
 
   mensagem.innerText = mensagemTempo(t.d);
 
-  let proxima = metas.find(m => t.d < m);
-  if (!proxima) proxima = metas[metas.length - 1];
-
+  let proxima = metas.find(m => t.d < m) || metas[metas.length-1];
   meta.innerText = `Próxima meta: ${proxima} dias (${t.d}/${proxima})`;
 }
 
 setInterval(update,1000);
 
-// 🌌 FUNDO CORRIGIDO (explode antes de crescer demais)
+// 🌌 FUNDO PREMIUM
 const canvas = document.getElementById("stars");
 const ctx = canvas.getContext("2d");
 
@@ -221,36 +211,36 @@ function resize(){
 }
 resize();
 
-let particulas = [];
+let estrelas = [];
 
-function criar(){
-  particulas.push({
+for(let i=0;i<120;i++){
+  estrelas.push({
     x: Math.random()*canvas.width,
     y: Math.random()*canvas.height,
     r: Math.random()*1.5,
-    vida: 0,
-    maxVida: 80 + Math.random()*40
+    alpha: Math.random(),
+    speed: Math.random()*0.5
   });
 }
 
 function animar(){
   ctx.clearRect(0,0,canvas.width,canvas.height);
 
-  if(Math.random() < 0.3) criar();
-
-  particulas.forEach((p,i)=>{
-    p.vida++;
-
-    let op = 1 - (p.vida / p.maxVida);
+  estrelas.forEach(e=>{
+    e.y -= e.speed;
+    if(e.y < 0){
+      e.y = canvas.height;
+      e.x = Math.random()*canvas.width;
+    }
 
     ctx.beginPath();
-    ctx.arc(p.x,p.y,p.r,0,Math.PI*2);
-    ctx.fillStyle = `rgba(250,204,21,${op * 0.5})`;
+    ctx.arc(e.x,e.y,e.r,0,Math.PI*2);
+    ctx.fillStyle = `rgba(167,139,250,${e.alpha})`;
     ctx.fill();
 
-    if(p.vida > p.maxVida){
-      particulas.splice(i,1);
-    }
+    // glow
+    ctx.shadowBlur = 10;
+    ctx.shadowColor = "#facc15";
   });
 
   requestAnimationFrame(animar);
