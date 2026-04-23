@@ -36,6 +36,16 @@ body {
   z-index: -1;
 }
 
+/* entrada suave */
+.card {
+  animation: aparecer 1s ease;
+}
+
+@keyframes aparecer {
+  from { opacity:0; transform: translateY(20px); }
+  to { opacity:1; transform: translateY(0); }
+}
+
 .card {
   backdrop-filter: blur(20px);
   background: rgba(255,255,255,0.05);
@@ -47,16 +57,31 @@ body {
   box-shadow:0 20px 60px rgba(0,0,0,0.6);
 }
 
-h1 {
-  font-size:1.6rem;
-  margin-bottom:25px;
-  color:#c084fc;
-  text-shadow:0 0 20px rgba(192,132,252,0.8);
+/* titulo degradê + brilho */
+.titulo h1 {
+  font-size:1.8rem;
+  background: linear-gradient(90deg, #facc15, #a78bfa, #facc15);
+  background-size: 200%;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  animation: brilho 3s linear infinite;
+}
+
+@keyframes brilho {
+  0% { background-position: 0% }
+  100% { background-position: 200% }
+}
+
+.titulo p {
+  margin-top:5px;
+  font-size:0.9rem;
+  color: rgba(255,255,255,0.7);
 }
 
 .tempo {
   display:flex;
   gap:10px;
+  margin-top:25px;
 }
 
 .box {
@@ -64,6 +89,11 @@ h1 {
   background: rgba(255,255,255,0.06);
   border-radius:15px;
   padding:15px;
+  transition:0.3s;
+}
+
+.box:hover {
+  transform: translateY(-5px);
 }
 
 .numero {
@@ -76,6 +106,27 @@ h1 {
   opacity:0.7;
 }
 
+/* barra de progresso */
+.progress {
+  margin-top:25px;
+  height:8px;
+  background: rgba(255,255,255,0.1);
+  border-radius:10px;
+  overflow:hidden;
+}
+
+.progress-bar {
+  height:100%;
+  width:0%;
+  background: linear-gradient(90deg, #facc15, #a78bfa);
+  transition:0.5s;
+}
+
+.meta-text {
+  margin-top:10px;
+  font-size:0.85rem;
+  opacity:0.8;
+}
 </style>
 </head>
 
@@ -84,7 +135,11 @@ h1 {
 <canvas id="stars"></canvas>
 
 <div class="card">
-  <h1 id="titulo"></h1>
+
+  <div class="titulo">
+    <h1>⏳ Tempo sem briga</h1>
+    <p id="subtitulo"></p>
+  </div>
 
   <div class="tempo">
     <div class="box"><div class="numero" id="dias">0</div><div class="label">Dias</div></div>
@@ -92,23 +147,33 @@ h1 {
     <div class="box"><div class="numero" id="minutos">0</div><div class="label">Min</div></div>
     <div class="box"><div class="numero" id="segundos">0</div><div class="label">Seg</div></div>
   </div>
+
+  <div class="progress">
+    <div class="progress-bar" id="barra"></div>
+  </div>
+
+  <div class="meta-text" id="meta"></div>
+
 </div>
 
 <script>
-// DATA DEFINIDA
+// DATA
 let dataInicial = new Date("2025-10-12T11:00:00");
 
-// FORMATA DATA
+// formatar data
 function formatarData(data) {
   return data.toLocaleDateString("pt-BR") + " às " +
          data.toLocaleTimeString("pt-BR", { hour: '2-digit', minute: '2-digit' });
 }
 
-// TITULO
-document.getElementById("titulo").innerText =
-  "⏳ Tempo sem briga do Orots e Pipis desde " + formatarData(dataInicial);
+// subtitulo
+document.getElementById("subtitulo").innerText =
+  "desde " + formatarData(dataInicial);
 
-// CALCULO
+// metas progressivas
+const metas = [1, 7, 30, 100, 365, 1000];
+
+// calcular tempo
 function calc(diff){
   return {
     d: Math.floor(diff/(1000*60*60*24)),
@@ -126,11 +191,22 @@ function update(){
   horas.innerText = t.h;
   minutos.innerText = t.m;
   segundos.innerText = t.s;
+
+  atualizarMeta(t.d);
+}
+
+function atualizarMeta(dias){
+  let proxima = metas.find(m => dias < m) || metas[metas.length-1];
+
+  let progresso = (dias / proxima) * 100;
+  barra.style.width = progresso + "%";
+
+  meta.innerText = `Próxima meta: ${proxima} dias (${dias}/${proxima})`;
 }
 
 setInterval(update,1000);
 
-// ESTRELAS
+// estrelas
 const canvas = document.getElementById("stars");
 const ctx = canvas.getContext("2d");
 
@@ -161,7 +237,7 @@ function animar(){
 
     ctx.beginPath();
     ctx.arc(e.x,e.y,e.size,0,Math.PI*2);
-    ctx.fillStyle = `rgba(167,139,250,${op})`;
+    ctx.fillStyle = `rgba(250,204,21,${op})`;
     ctx.fill();
   });
 
