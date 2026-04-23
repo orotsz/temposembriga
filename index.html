@@ -26,7 +26,7 @@ body {
   100% { background-position:0% 50% }
 }
 
-/* 🌌 fundo estrelas */
+/* estrelas */
 #stars {
   position: fixed;
   top: 0;
@@ -48,7 +48,7 @@ body {
 }
 
 h1 {
-  font-size:1.8rem;
+  font-size:1.6rem;
   margin-bottom:25px;
   color:#c084fc;
   text-shadow:0 0 20px rgba(192,132,252,0.8);
@@ -76,49 +76,6 @@ h1 {
   opacity:0.7;
 }
 
-.progress {
-  margin-top:20px;
-  height:8px;
-  background: rgba(255,255,255,0.1);
-  border-radius:10px;
-  overflow:hidden;
-}
-
-.progress-bar {
-  height:100%;
-  width:0%;
-  background: linear-gradient(90deg, #a78bfa, #7c3aed);
-  transition:0.5s;
-}
-
-.meta-text {
-  margin-top:10px;
-  font-size:0.8rem;
-}
-
-.btns {
-  margin-top:20px;
-}
-
-button {
-  padding:10px;
-  border:none;
-  border-radius:10px;
-  background:#7c3aed;
-  color:white;
-  margin:5px;
-  cursor:pointer;
-}
-
-.toast {
-  position:fixed;
-  bottom:20px;
-  background:#7c3aed;
-  padding:10px 20px;
-  border-radius:10px;
-  opacity:0;
-  transition:0.3s;
-}
 </style>
 </head>
 
@@ -127,7 +84,7 @@ button {
 <canvas id="stars"></canvas>
 
 <div class="card">
-  <h1>⏳ Tempo sem briga do Orots e Pipis</h1>
+  <h1 id="titulo"></h1>
 
   <div class="tempo">
     <div class="box"><div class="numero" id="dias">0</div><div class="label">Dias</div></div>
@@ -135,21 +92,21 @@ button {
     <div class="box"><div class="numero" id="minutos">0</div><div class="label">Min</div></div>
     <div class="box"><div class="numero" id="segundos">0</div><div class="label">Seg</div></div>
   </div>
-
-  <div class="progress"><div class="progress-bar" id="barra"></div></div>
-  <div class="meta-text" id="meta"></div>
-
-  <div class="btns">
-    <button onclick="copiar()">Copiar link</button>
-    <button onclick="resetar()">Resetar</button>
-  </div>
 </div>
 
-<div class="toast" id="toast">Copiado!</div>
-
 <script>
-// DATA
-let dataInicial = new Date("2026-04-01T00:00:00");
+// DATA DEFINIDA
+let dataInicial = new Date("2025-10-12T11:00:00");
+
+// FORMATA DATA
+function formatarData(data) {
+  return data.toLocaleDateString("pt-BR") + " às " +
+         data.toLocaleTimeString("pt-BR", { hour: '2-digit', minute: '2-digit' });
+}
+
+// TITULO
+document.getElementById("titulo").innerText =
+  "⏳ Tempo sem briga do Orots e Pipis desde " + formatarData(dataInicial);
 
 // CALCULO
 function calc(diff){
@@ -169,28 +126,11 @@ function update(){
   horas.innerText = t.h;
   minutos.innerText = t.m;
   segundos.innerText = t.s;
-
-  let metaDias = 30;
-  barra.style.width = (t.d/metaDias)*100 + "%";
-  meta.innerText = `Meta: ${t.d}/${metaDias} dias`;
 }
 
-// BOTÕES
-function copiar(){
-  const url = location.href;
-  navigator.clipboard.writeText(url);
-  toast.style.opacity = 1;
-  setTimeout(()=>toast.style.opacity=0,2000);
-}
-
-function resetar(){
-  dataInicial = new Date();
-}
-
-// LOOP
 setInterval(update,1000);
 
-// 🌌 ESTRELAS
+// ESTRELAS
 const canvas = document.getElementById("stars");
 const ctx = canvas.getContext("2d");
 
