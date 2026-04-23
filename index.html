@@ -50,7 +50,7 @@ body {
   to { opacity:1; transform: translateY(0); }
 }
 
-/* título bonito */
+/* título */
 .titulo h1 {
   font-size:1.8rem;
   background: linear-gradient(90deg, #facc15, #a78bfa, #facc15);
@@ -159,7 +159,7 @@ function formatarData(data) {
 
 subtitulo.innerText = "desde " + formatarData(dataInicial);
 
-// mensagens por tempo
+// mensagens
 function mensagemTempo(dias){
   if(dias < 1) return "todo começo importa ❤️";
   if(dias < 7) return "uma semana quase... tô gostando disso 🥹";
@@ -180,8 +180,8 @@ function mensagemSurpresa(){
   alert(frases[Math.floor(Math.random()*frases.length)]);
 }
 
-// metas
-const metas = [7,30,100];
+// metas corrigidas
+const metas = [1, 7, 30, 100, 365];
 
 function calc(diff){
   return {
@@ -203,45 +203,61 @@ function update(){
 
   mensagem.innerText = mensagemTempo(t.d);
 
-  let proxima = metas.find(m => t.d < m) || metas[metas.length-1];
-  meta.innerText = `meta: ${proxima} dias (${t.d}/${proxima})`;
+  let proxima = metas.find(m => t.d < m);
+  if (!proxima) proxima = metas[metas.length - 1];
+
+  meta.innerText = `Próxima meta: ${proxima} dias (${t.d}/${proxima})`;
 }
 
 setInterval(update,1000);
 
-// estrelas
+// 🌌 FUNDO CORRIGIDO (explode antes de crescer demais)
 const canvas = document.getElementById("stars");
 const ctx = canvas.getContext("2d");
 
-canvas.width = window.innerWidth;
-canvas.height = window.innerHeight;
+function resize(){
+  canvas.width = window.innerWidth;
+  canvas.height = window.innerHeight;
+}
+resize();
 
-let estrelas = [];
+let particulas = [];
 
-for(let i=0;i<100;i++){
-  estrelas.push({
+function criar(){
+  particulas.push({
     x: Math.random()*canvas.width,
     y: Math.random()*canvas.height,
-    r: Math.random()*2,
-    v: Math.random()*0.02
+    r: Math.random()*1.5,
+    vida: 0,
+    maxVida: 80 + Math.random()*40
   });
 }
 
-function draw(){
+function animar(){
   ctx.clearRect(0,0,canvas.width,canvas.height);
 
-  estrelas.forEach(e=>{
-    e.r += e.v;
+  if(Math.random() < 0.3) criar();
+
+  particulas.forEach((p,i)=>{
+    p.vida++;
+
+    let op = 1 - (p.vida / p.maxVida);
+
     ctx.beginPath();
-    ctx.arc(e.x,e.y,e.r,0,Math.PI*2);
-    ctx.fillStyle = "rgba(250,204,21,0.5)";
+    ctx.arc(p.x,p.y,p.r,0,Math.PI*2);
+    ctx.fillStyle = `rgba(250,204,21,${op * 0.5})`;
     ctx.fill();
+
+    if(p.vida > p.maxVida){
+      particulas.splice(i,1);
+    }
   });
 
-  requestAnimationFrame(draw);
+  requestAnimationFrame(animar);
 }
 
-draw();
+animar();
+window.addEventListener("resize", resize);
 </script>
 
 </body>
