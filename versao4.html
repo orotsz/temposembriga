@@ -1,0 +1,236 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Tempo sem briga</title>
+
+<style>
+* { margin:0; padding:0; box-sizing:border-box; font-family: 'Segoe UI', sans-serif; }
+
+body {
+  height:100vh;
+  display:flex;
+  justify-content:center;
+  align-items:center;
+  color:white;
+  background: linear-gradient(-45deg, #0f172a, #1e1b4b, #020617, #1e293b);
+  background-size: 400% 400%;
+  animation: bg 12s ease infinite;
+  overflow:hidden;
+}
+
+@keyframes bg {
+  0% { background-position:0% 50% }
+  50% { background-position:100% 50% }
+  100% { background-position:0% 50% }
+}
+
+/* 🌌 fundo estrelas */
+#stars {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: -1;
+}
+
+.card {
+  backdrop-filter: blur(20px);
+  background: rgba(255,255,255,0.05);
+  border:1px solid rgba(255,255,255,0.1);
+  padding:40px;
+  border-radius:25px;
+  text-align:center;
+  width:420px;
+  box-shadow:0 20px 60px rgba(0,0,0,0.6);
+}
+
+h1 {
+  font-size:1.8rem;
+  margin-bottom:25px;
+  color:#c084fc;
+  text-shadow:0 0 20px rgba(192,132,252,0.8);
+}
+
+.tempo {
+  display:flex;
+  gap:10px;
+}
+
+.box {
+  flex:1;
+  background: rgba(255,255,255,0.06);
+  border-radius:15px;
+  padding:15px;
+}
+
+.numero {
+  font-size:2rem;
+  font-weight:bold;
+}
+
+.label {
+  font-size:0.7rem;
+  opacity:0.7;
+}
+
+.progress {
+  margin-top:20px;
+  height:8px;
+  background: rgba(255,255,255,0.1);
+  border-radius:10px;
+  overflow:hidden;
+}
+
+.progress-bar {
+  height:100%;
+  width:0%;
+  background: linear-gradient(90deg, #a78bfa, #7c3aed);
+  transition:0.5s;
+}
+
+.meta-text {
+  margin-top:10px;
+  font-size:0.8rem;
+}
+
+.btns {
+  margin-top:20px;
+}
+
+button {
+  padding:10px;
+  border:none;
+  border-radius:10px;
+  background:#7c3aed;
+  color:white;
+  margin:5px;
+  cursor:pointer;
+}
+
+.toast {
+  position:fixed;
+  bottom:20px;
+  background:#7c3aed;
+  padding:10px 20px;
+  border-radius:10px;
+  opacity:0;
+  transition:0.3s;
+}
+</style>
+</head>
+
+<body>
+
+<canvas id="stars"></canvas>
+
+<div class="card">
+  <h1>⏳ Tempo sem briga do Orots e Pipis</h1>
+
+  <div class="tempo">
+    <div class="box"><div class="numero" id="dias">0</div><div class="label">Dias</div></div>
+    <div class="box"><div class="numero" id="horas">0</div><div class="label">Horas</div></div>
+    <div class="box"><div class="numero" id="minutos">0</div><div class="label">Min</div></div>
+    <div class="box"><div class="numero" id="segundos">0</div><div class="label">Seg</div></div>
+  </div>
+
+  <div class="progress"><div class="progress-bar" id="barra"></div></div>
+  <div class="meta-text" id="meta"></div>
+
+  <div class="btns">
+    <button onclick="copiar()">Copiar link</button>
+    <button onclick="resetar()">Resetar</button>
+  </div>
+</div>
+
+<div class="toast" id="toast">Copiado!</div>
+
+<script>
+// DATA
+let dataInicial = new Date("2026-04-01T00:00:00");
+
+// CALCULO
+function calc(diff){
+  return {
+    d: Math.floor(diff/(1000*60*60*24)),
+    h: Math.floor(diff/(1000*60*60))%24,
+    m: Math.floor(diff/(1000*60))%60,
+    s: Math.floor(diff/1000)%60
+  };
+}
+
+function update(){
+  const diff = new Date() - dataInicial;
+  const t = calc(diff);
+
+  dias.innerText = t.d;
+  horas.innerText = t.h;
+  minutos.innerText = t.m;
+  segundos.innerText = t.s;
+
+  let metaDias = 30;
+  barra.style.width = (t.d/metaDias)*100 + "%";
+  meta.innerText = `Meta: ${t.d}/${metaDias} dias`;
+}
+
+// BOTÕES
+function copiar(){
+  const url = location.href;
+  navigator.clipboard.writeText(url);
+  toast.style.opacity = 1;
+  setTimeout(()=>toast.style.opacity=0,2000);
+}
+
+function resetar(){
+  dataInicial = new Date();
+}
+
+// LOOP
+setInterval(update,1000);
+
+// 🌌 ESTRELAS
+const canvas = document.getElementById("stars");
+const ctx = canvas.getContext("2d");
+
+function resize(){
+  canvas.width = window.innerWidth;
+  canvas.height = window.innerHeight;
+}
+resize();
+
+let estrelas = [];
+
+for(let i=0;i<120;i++){
+  estrelas.push({
+    x: Math.random()*canvas.width,
+    y: Math.random()*canvas.height,
+    size: Math.random()*2,
+    brilho: Math.random(),
+    vel: Math.random()*0.02
+  });
+}
+
+function animar(){
+  ctx.clearRect(0,0,canvas.width,canvas.height);
+
+  estrelas.forEach(e=>{
+    e.brilho += e.vel;
+    let op = (Math.sin(e.brilho)+1)/2;
+
+    ctx.beginPath();
+    ctx.arc(e.x,e.y,e.size,0,Math.PI*2);
+    ctx.fillStyle = `rgba(167,139,250,${op})`;
+    ctx.fill();
+  });
+
+  requestAnimationFrame(animar);
+}
+
+animar();
+window.addEventListener("resize", resize);
+</script>
+
+</body>
+</html>
