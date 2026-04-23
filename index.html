@@ -145,8 +145,10 @@ button {
 </div>
 
 <script>
+// DATA
 let dataInicial = new Date("2025-10-12T11:00:00");
 
+// formatar
 function formatarData(data) {
   return data.toLocaleDateString("pt-BR") + " às " +
          data.toLocaleTimeString("pt-BR", { hour: '2-digit', minute: '2-digit' });
@@ -154,6 +156,7 @@ function formatarData(data) {
 
 subtitulo.innerText = "desde " + formatarData(dataInicial);
 
+// mensagens
 function mensagemTempo(dias){
   if(dias < 1) return "todo começo importa ❤️";
   if(dias < 7) return "uma semana quase... tô gostando disso 🥹";
@@ -173,35 +176,41 @@ function mensagemSurpresa(){
   alert(frases[Math.floor(Math.random()*frases.length)]);
 }
 
+// metas
 const metas = [1, 7, 30, 100, 365];
 
-function calc(diff){
-  return {
-    d: Math.floor(diff/(1000*60*60*24)),
-    h: Math.floor(diff/(1000*60*60))%24,
-    m: Math.floor(diff/(1000*60))%60,
-    s: Math.floor(diff/1000)%60
-  };
-}
+// animação contador
+let inicio = Date.now();
+let duracao = 1500;
 
 function update(){
-  const diff = new Date() - dataInicial;
-  const t = calc(diff);
+  let agora = Date.now();
+  let progresso = Math.min((agora - inicio) / duracao, 1);
 
-  dias.innerText = t.d;
-  horas.innerText = t.h;
-  minutos.innerText = t.m;
-  segundos.innerText = t.s;
+  const diffReal = new Date() - dataInicial;
+  const diffAnimado = diffReal * progresso;
 
-  mensagem.innerText = mensagemTempo(t.d);
+  const d = Math.floor(diffAnimado/(1000*60*60*24));
+  const h = Math.floor(diffAnimado/(1000*60*60))%24;
+  const m = Math.floor(diffAnimado/(1000*60))%60;
+  const s = Math.floor(diffAnimado/1000)%60;
 
-  let proxima = metas.find(m => t.d < m) || metas[metas.length-1];
-  meta.innerText = `Próxima meta: ${proxima} dias (${t.d}/${proxima})`;
+  dias.innerText = d;
+  horas.innerText = h;
+  minutos.innerText = m;
+  segundos.innerText = s;
+
+  mensagem.innerText = mensagemTempo(d);
+
+  let proxima = metas.find(m => d < m) || metas[metas.length-1];
+  meta.innerText = `Próxima meta: ${proxima} dias (${d}/${proxima})`;
+
+  requestAnimationFrame(update);
 }
 
-setInterval(update,1000);
+update();
 
-// 🌌 FUNDO PREMIUM
+// 🌟 ESTRELAS AMARELAS SUAVES
 const canvas = document.getElementById("stars");
 const ctx = canvas.getContext("2d");
 
@@ -213,13 +222,12 @@ resize();
 
 let estrelas = [];
 
-for(let i=0;i<120;i++){
+for(let i=0;i<100;i++){
   estrelas.push({
     x: Math.random()*canvas.width,
     y: Math.random()*canvas.height,
-    r: Math.random()*1.5,
-    alpha: Math.random(),
-    speed: Math.random()*0.5
+    size: Math.random()*2,
+    speed: Math.random()*0.3
   });
 }
 
@@ -234,13 +242,9 @@ function animar(){
     }
 
     ctx.beginPath();
-    ctx.arc(e.x,e.y,e.r,0,Math.PI*2);
-    ctx.fillStyle = `rgba(167,139,250,${e.alpha})`;
+    ctx.arc(e.x,e.y,e.size,0,Math.PI*2);
+    ctx.fillStyle = "rgba(250,204,21,0.8)";
     ctx.fill();
-
-    // glow
-    ctx.shadowBlur = 10;
-    ctx.shadowColor = "#facc15";
   });
 
   requestAnimationFrame(animar);
