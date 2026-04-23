@@ -26,7 +26,6 @@ body {
   100% { background-position:0% 50% }
 }
 
-/* estrelas */
 #stars {
   position: fixed;
   top: 0;
@@ -36,8 +35,13 @@ body {
   z-index: -1;
 }
 
-/* entrada suave */
 .card {
+  backdrop-filter: blur(20px);
+  background: rgba(255,255,255,0.05);
+  padding:40px;
+  border-radius:25px;
+  text-align:center;
+  width:420px;
   animation: aparecer 1s ease;
 }
 
@@ -46,22 +50,10 @@ body {
   to { opacity:1; transform: translateY(0); }
 }
 
-.card {
-  backdrop-filter: blur(20px);
-  background: rgba(255,255,255,0.05);
-  border:1px solid rgba(255,255,255,0.1);
-  padding:40px;
-  border-radius:25px;
-  text-align:center;
-  width:420px;
-  box-shadow:0 20px 60px rgba(0,0,0,0.6);
-}
-
-/* titulo degradê + brilho */
+/* título bonito */
 .titulo h1 {
   font-size:1.8rem;
   background: linear-gradient(90deg, #facc15, #a78bfa, #facc15);
-  background-size: 200%;
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   animation: brilho 3s linear infinite;
@@ -73,27 +65,22 @@ body {
 }
 
 .titulo p {
-  margin-top:5px;
   font-size:0.9rem;
-  color: rgba(255,255,255,0.7);
+  opacity:0.7;
+  margin-top:5px;
 }
 
 .tempo {
   display:flex;
   gap:10px;
-  margin-top:25px;
+  margin-top:20px;
 }
 
 .box {
   flex:1;
   background: rgba(255,255,255,0.06);
-  border-radius:15px;
   padding:15px;
-  transition:0.3s;
-}
-
-.box:hover {
-  transform: translateY(-5px);
+  border-radius:15px;
 }
 
 .numero {
@@ -106,27 +93,31 @@ body {
   opacity:0.7;
 }
 
-/* barra de progresso */
-.progress {
-  margin-top:25px;
-  height:8px;
-  background: rgba(255,255,255,0.1);
+/* mensagem */
+.mensagem {
+  margin-top:20px;
+  font-size:0.9rem;
+  opacity:0.85;
+}
+
+/* botão */
+button {
+  margin-top:15px;
+  padding:10px 15px;
+  border:none;
   border-radius:10px;
-  overflow:hidden;
+  background:#a78bfa;
+  color:white;
+  cursor:pointer;
 }
 
-.progress-bar {
-  height:100%;
-  width:0%;
-  background: linear-gradient(90deg, #facc15, #a78bfa);
-  transition:0.5s;
-}
-
-.meta-text {
-  margin-top:10px;
+/* meta */
+.meta {
+  margin-top:15px;
   font-size:0.85rem;
   opacity:0.8;
 }
+
 </style>
 </head>
 
@@ -148,11 +139,11 @@ body {
     <div class="box"><div class="numero" id="segundos">0</div><div class="label">Seg</div></div>
   </div>
 
-  <div class="progress">
-    <div class="progress-bar" id="barra"></div>
-  </div>
+  <div class="mensagem" id="mensagem"></div>
 
-  <div class="meta-text" id="meta"></div>
+  <button onclick="mensagemSurpresa()">💌 Mensagem pra você</button>
+
+  <div class="meta" id="meta"></div>
 
 </div>
 
@@ -160,20 +151,38 @@ body {
 // DATA
 let dataInicial = new Date("2025-10-12T11:00:00");
 
-// formatar data
+// formatar
 function formatarData(data) {
   return data.toLocaleDateString("pt-BR") + " às " +
          data.toLocaleTimeString("pt-BR", { hour: '2-digit', minute: '2-digit' });
 }
 
-// subtitulo
-document.getElementById("subtitulo").innerText =
-  "desde " + formatarData(dataInicial);
+subtitulo.innerText = "desde " + formatarData(dataInicial);
 
-// metas progressivas
-const metas = [1, 7, 30, 100, 365, 1000];
+// mensagens por tempo
+function mensagemTempo(dias){
+  if(dias < 1) return "todo começo importa ❤️";
+  if(dias < 7) return "uma semana quase... tô gostando disso 🥹";
+  if(dias < 30) return "isso aqui já tá diferente 💜";
+  if(dias < 100) return "orgulho da gente, de verdade ✨";
+  return "isso aqui já é especial demais 💖";
+}
 
-// calcular tempo
+// surpresa
+function mensagemSurpresa(){
+  const frases = [
+    "mesmo quando a gente discute, eu escolho você",
+    "eu só quero que a gente dê certo",
+    "você vale a pena, até nos dias difíceis",
+    "eu gosto da gente",
+    "quero construir algo bonito com você"
+  ];
+  alert(frases[Math.floor(Math.random()*frases.length)]);
+}
+
+// metas
+const metas = [7,30,100];
+
 function calc(diff){
   return {
     d: Math.floor(diff/(1000*60*60*24)),
@@ -192,16 +201,10 @@ function update(){
   minutos.innerText = t.m;
   segundos.innerText = t.s;
 
-  atualizarMeta(t.d);
-}
+  mensagem.innerText = mensagemTempo(t.d);
 
-function atualizarMeta(dias){
-  let proxima = metas.find(m => dias < m) || metas[metas.length-1];
-
-  let progresso = (dias / proxima) * 100;
-  barra.style.width = progresso + "%";
-
-  meta.innerText = `Próxima meta: ${proxima} dias (${dias}/${proxima})`;
+  let proxima = metas.find(m => t.d < m) || metas[metas.length-1];
+  meta.innerText = `meta: ${proxima} dias (${t.d}/${proxima})`;
 }
 
 setInterval(update,1000);
@@ -210,42 +213,35 @@ setInterval(update,1000);
 const canvas = document.getElementById("stars");
 const ctx = canvas.getContext("2d");
 
-function resize(){
-  canvas.width = window.innerWidth;
-  canvas.height = window.innerHeight;
-}
-resize();
+canvas.width = window.innerWidth;
+canvas.height = window.innerHeight;
 
 let estrelas = [];
 
-for(let i=0;i<120;i++){
+for(let i=0;i<100;i++){
   estrelas.push({
     x: Math.random()*canvas.width,
     y: Math.random()*canvas.height,
-    size: Math.random()*2,
-    brilho: Math.random(),
-    vel: Math.random()*0.02
+    r: Math.random()*2,
+    v: Math.random()*0.02
   });
 }
 
-function animar(){
+function draw(){
   ctx.clearRect(0,0,canvas.width,canvas.height);
 
   estrelas.forEach(e=>{
-    e.brilho += e.vel;
-    let op = (Math.sin(e.brilho)+1)/2;
-
+    e.r += e.v;
     ctx.beginPath();
-    ctx.arc(e.x,e.y,e.size,0,Math.PI*2);
-    ctx.fillStyle = `rgba(250,204,21,${op})`;
+    ctx.arc(e.x,e.y,e.r,0,Math.PI*2);
+    ctx.fillStyle = "rgba(250,204,21,0.5)";
     ctx.fill();
   });
 
-  requestAnimationFrame(animar);
+  requestAnimationFrame(draw);
 }
 
-animar();
-window.addEventListener("resize", resize);
+draw();
 </script>
 
 </body>
